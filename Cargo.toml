@@ -1,0 +1,9 @@
+[package]
+name = "rusty-polygons"
+version = "0.1.0"
+authors = ["Federico Rebora <ufinii@gmail.com>"]
+build = "build.rs"
+
+[dependencies]
+ggez = "0.3"
+sdl2 = "0.27.3"
