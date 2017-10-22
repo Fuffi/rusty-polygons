@@ -4,7 +4,7 @@ use ggez::event;
 use ggez::event::{MouseButton};
 use ggez::{GameResult, Context};
 use ggez::graphics;
-use ggez::graphics::{DrawMode, Point};
+use ggez::graphics::{Color, DrawMode, Point};
 use std::time::Duration;
 
 enum DrawingState {
@@ -58,6 +58,8 @@ impl event::EventHandler for MainState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
+        let drawing_color = Color { r: 1.0, g: 0.5, b: 0.5, a: 1.0 };
+        graphics::set_color(ctx, drawing_color)?;
         match self.state {
             DrawingState::Idle => {
                 ()
@@ -69,6 +71,9 @@ impl event::EventHandler for MainState {
                 ()
             },
         }
+
+        let drawed_color = Color { r: 0.5, g: 0.5, b: 0.5, a: 1.0 };
+        graphics::set_color(ctx, drawed_color)?;
         for vertices in &self.canvas.meshes {
             graphics::polygon(ctx, DrawMode::Fill, &vertices).unwrap();
         }
