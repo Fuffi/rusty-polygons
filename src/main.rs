@@ -14,14 +14,39 @@ enum DrawingState {
 
 struct MainState {
     state: DrawingState,
+    canvas: Canvas,
+}
+
+struct Canvas {
+    meshes: Vec<Vec<Point>>,
 }
 
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
-        let result = Mesh::new_polygon(ctx, DrawMode::Fill, &[Point { x: -50.0, y: -50.0 }, Point { x: 50.0, y: 0.0 }, Point { x: -50.0, y: 50.0 }], 100.0);
-        match result {
-            Ok(mesh) => Ok(MainState { state: DrawingState::Idle }),
-            Err(err) => Err(err),
+        let canvas = Canvas { meshes: [].to_vec() };
+        Ok(MainState { state: DrawingState::Idle, canvas: canvas })
+    }
+
+    fn left_click(&mut self, x: i32, y: i32) {
+        self.state = match self.state {
+            DrawingState::Idle => {
+                let point = Point { x: x as f32, y: y as f32 };
+                DrawingState::Drawing([point].to_vec())
+            },
+            DrawingState::Drawing(ref mut vertices) => {
+                vertices.push(Point { x: x as f32, y: y as f32 });
+                DrawingState::Drawing(vertices.to_vec())
+            },
+        }
+    }
+
+    fn right_click(&mut self, x: i32, y: i32) {
+        self.state = match self.state {
+            DrawingState::Drawing(ref mesh) => {
+                self.canvas.meshes.push(mesh.clone());
+                DrawingState::Idle
+            },
+            _ => DrawingState::Idle
         }
     }
 }
@@ -45,20 +70,18 @@ impl event::EventHandler for MainState {
                 ()
             },
         }
+        for vertices in &self.canvas.meshes {
+            graphics::polygon(ctx, DrawMode::Fill, &vertices);
+        }
         graphics::present(ctx);
         Ok(())
     }
 
-    fn mouse_button_down_event(&mut self, _button: MouseButton, x: i32, y: i32) {
-        self.state = match self.state {
-            DrawingState::Idle => {
-                let point = Point { x: x as f32, y: y as f32 };
-                DrawingState::Drawing([point].to_vec())
-            },
-            DrawingState::Drawing(ref mut vertices) => {
-                vertices.push(Point { x: x as f32, y: y as f32 });
-                DrawingState::Drawing(vertices.to_vec())
-            },
+    fn mouse_button_down_event(&mut self, button: MouseButton, x: i32, y: i32) {
+        match button {
+            MouseButton::Left => self.left_click(x, y),
+            MouseButton::Right => self.right_click(x, y),
+            _ => (),
         }
     }
 
