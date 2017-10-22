@@ -4,7 +4,7 @@ use ggez::event;
 use ggez::event::{MouseButton};
 use ggez::{GameResult, Context};
 use ggez::graphics;
-use ggez::graphics::{Color, DrawMode, Mesh, Point};
+use ggez::graphics::{DrawMode, Point};
 use std::time::Duration;
 
 enum DrawingState {
@@ -22,7 +22,7 @@ struct Canvas {
 }
 
 impl MainState {
-    fn new(ctx: &mut Context) -> GameResult<MainState> {
+    fn new(_ctx: &mut Context) -> GameResult<MainState> {
         let canvas = Canvas { meshes: [].to_vec() };
         Ok(MainState { state: DrawingState::Idle, canvas: canvas })
     }
@@ -40,7 +40,7 @@ impl MainState {
         }
     }
 
-    fn right_click(&mut self, x: i32, y: i32) {
+    fn right_click(&mut self, _x: i32, _y: i32) {
         self.state = match self.state {
             DrawingState::Drawing(ref mesh) => {
                 self.canvas.meshes.push(mesh.clone());
@@ -57,7 +57,6 @@ impl event::EventHandler for MainState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        use ggez::graphics::Drawable;
         graphics::clear(ctx);
         match self.state {
             DrawingState::Idle => {
@@ -65,13 +64,13 @@ impl event::EventHandler for MainState {
             },
             DrawingState::Drawing(ref vertices) => {
                 if vertices.len() > 2 {
-                    graphics::polygon(ctx, DrawMode::Fill, vertices);
+                    graphics::polygon(ctx, DrawMode::Fill, vertices).unwrap();
                 }
                 ()
             },
         }
         for vertices in &self.canvas.meshes {
-            graphics::polygon(ctx, DrawMode::Fill, &vertices);
+            graphics::polygon(ctx, DrawMode::Fill, &vertices).unwrap();
         }
         graphics::present(ctx);
         Ok(())
@@ -89,7 +88,7 @@ impl event::EventHandler for MainState {
 
 pub fn main() {
     let c = conf::Conf::new();
-    let ctx = &mut Context::load_from_conf("super_simple", "ggez", c).unwrap();
+    let ctx = &mut Context::load_from_conf("super_simple", "Zeneixe", c).unwrap();
     let state = &mut MainState::new(ctx).unwrap();
     event::run(ctx, state).unwrap();
 }
